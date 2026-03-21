@@ -16,48 +16,67 @@ struct Numbers3Page: View {
     @State var buttonText = "更新"
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(
-            entity: Loto.entity(),                                                       // エンティティ生成
-            sortDescriptors: [NSSortDescriptor(key: "numberOfTime", ascending: false)],  // 回数でソート
+            entity: Numbers.entity(),
+            sortDescriptors: [NSSortDescriptor(key: "numberOfTime", ascending: false)],
+            // ソート対象をデータタイプ（宝くじ種別）でNumbers3のみとする
+            predicate: NSPredicate(format: "type == %d", TAKARAKUJI_LOTO_TYPE_NUMBERS3),
             animation: .default
-        ) var fetchedMemoList: FetchedResults<Loto>
+        ) var fetchedMemoList: FetchedResults<Numbers>
+    
+    @State private var selectedItem: Numbers?
+    @State private var showEditSheet = false
+    @State private var showAddSheet = false
     
     var body: some View {
-        VStack{
-            Spacer()
+        VStack(alignment: .center, spacing: 0) {
             Text("Numbers3")
-                .padding()
                 .font(.title)
-
-            HStack{
-                DatePicker(
-                    "抽選日",
-                    selection: $date,
-                    displayedComponents: [.date]
-                ).padding()
+                .padding(.top, 8)
+                .padding(.bottom, 8)
+            //登録されているナンバーズデータ（@FetchRequest）からリスト表示する
+            List(fetchedMemoList) { item in
+                VStack(alignment: .leading) {
+                    Text("回数: \(item.numberOfTime)")
+                    Text("当選数字: \(item.winingNumber)")
+                    if let date = item.timestamp {
+                        Text("抽選日: \(date.formatted(date: .numeric, time: .omitted))")
+                    }
+                }
+                // リストの各行を長押し/押下でポップアップメニューを出す
+                // Listの各行にcontextMenuを配置
+                // リストは長押しする。
+                .contextMenu {
+                    Button {
+                        selectedItem = item
+                        showEditSheet = true
+                    } label: {
+                        Label("変更", systemImage: "info.circle")
+                    }
+                    Button(role: .destructive) {
+                        delete(item)
+                    } label: {
+                        Label("削除", systemImage: "trash")
+                    }
+                }
             }
-            HStack{
-                Text("回数")
-                    .padding()
-                TextField("NNNN", value: $numOfTime, format: .number)
-                    .keyboardType(.numberPad)       // キーボードの入力設定
-                    .textFieldStyle(.roundedBorder) // 枠線表示
-                    .frame(width: 90.0)             // 入力枠の大きさ(幅)
-                    .padding()
-
+            .frame(height: 500)
+            .sheet(isPresented: $showEditSheet) {
+                if let target = selectedItem {
+                    NumbersDetailView(item: target)
+                        .environment(\.managedObjectContext, viewContext)
+                }
             }
-            HStack{
-                Text("当選数字")
-                    .padding()
-                TextField("NNNN", value: $winNumber, format: .number)
-                    .textFieldStyle(.roundedBorder) // 枠線表示
-                    .frame(width: 70.0)            // 入力枠の大きさ(幅)
+            .sheet(isPresented: $showAddSheet) {
+                NumbersCreateView()
+                    .environment(\.managedObjectContext, viewContext)
             }
+            
             HStack{
                 // ボタン押下
                 Button(action: {
-                    updateNumbers3()
+                    showAddSheet = true
                 }){
-                    Text("更新")
+                    Text("追加")
                         .bold()
                         .padding()
                         .frame(width: 100, height: 50)
@@ -65,19 +84,8 @@ struct Numbers3Page: View {
                         .background(Color.blue)
                         .padding()
                 }
-
-                Button(action: {
-
-                }){
-                    Text("削除")
-                        .bold()
-                        .padding()
-                        .frame(width: 100, height: 50)
-                        .foregroundColor(Color.white)
-                        .background(Color.red)
-                        .padding()
-                }
             }.padding()
+
 
             NavigationLink(destination: Number3DsitributionMap()) {
                 Text("Numbers3 Distribution Map")
@@ -85,14 +93,14 @@ struct Numbers3Page: View {
             }.padding()
         }
     }
-    // Numbers3更新
-    private func updateNumbers3(){
-        let Num3 = Numbers(context: viewContext)
-        Num3.type = Int32(TAKARAKUJI_LOTO_TYPE_NUMBERS3)
-        Num3.timestamp = date
-        Num3.numberOfTime = Int32(numOfTime)          // 回数設定
-        Num3.winingNumber = Int16(winNumber)
-        try? viewContext.save()
+    
+    private func delete(_ item: Numbers) {
+        viewContext.delete(item)
+        do {
+            try viewContext.save()
+        } catch {
+            print("Failed to delete: \(error)")
+        }
     }
     
 }
@@ -146,3 +154,99 @@ struct Number3DsitributionMap:View {
         }
     }
 }
+
+struct NumbersDetailView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var item: Numbers
+
+    @State private var date: Date = Date()
+    @State private var numberOfTimeText: String = ""
+    @State private var winNumberText: String = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                DatePicker("抽選日", selection: $date, displayedComponents: .date)
+                TextField("回数", text: $numberOfTimeText)
+                    .keyboardType(.numberPad)
+                TextField("当選数字(3桁)", text: $winNumberText)
+                    .keyboardType(.numberPad)
+            }
+            .navigationTitle("変更")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("キャンセル") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("保存") { save() }
+                }
+            }
+            .onAppear {
+                date = item.timestamp ?? Date()
+                numberOfTimeText = String(Int(item.numberOfTime))
+                winNumberText = String(Int(item.winingNumber))
+            }
+        }
+    }
+
+    private func save() {
+        item.timestamp = date
+        let numberOfTime = Int(numberOfTimeText) ?? 0
+        let winNumber = Int(winNumberText) ?? 0
+        item.numberOfTime = Int32(numberOfTime)
+        item.winingNumber = Int16(winNumber)
+        do {
+            try viewContext.save()
+            dismiss()
+        } catch {
+            print("Failed to save: \(error)")
+        }
+    }
+}
+
+struct NumbersCreateView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.dismiss) private var dismiss
+    @State private var date: Date = Date()
+    @State private var numberOfTimeText: String = ""
+    @State private var winNumberText: String = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                DatePicker("抽選日", selection: $date, displayedComponents: .date)
+                TextField("回数", text: $numberOfTimeText)
+                    .keyboardType(.numberPad)
+                TextField("当選数字", text: $winNumberText)
+                    .keyboardType(.numberPad)
+            }
+            .navigationTitle("追加")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("キャンセル") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("保存") { save() }
+                }
+            }
+        }
+    }
+
+    private func save() {
+        let num3 = Numbers(context: viewContext)
+        num3.type = Int32(TAKARAKUJI_LOTO_TYPE_NUMBERS3)
+        num3.timestamp = date
+        let numberOfTime = Int(numberOfTimeText) ?? 0
+        let winNumber = Int(winNumberText) ?? 0
+        num3.numberOfTime = Int32(numberOfTime)
+        num3.winingNumber = Int16(winNumber)
+        do {
+            try viewContext.save()
+            dismiss()
+        } catch {
+            print("Failed to save: \(error)")
+        }
+    }
+}
+
