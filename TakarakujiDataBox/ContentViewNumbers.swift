@@ -25,6 +25,7 @@ struct Numbers3Page: View {
     
     @State private var selectedItem: Numbers?
     @State private var showAddSheet = false
+    @State private var showDeleteAllAlert = false
     
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
@@ -80,8 +81,27 @@ struct Numbers3Page: View {
                         .background(Color.blue)
                         .padding()
                 }
-            }.padding()
 
+                // ボタン押下
+                Button(action: {
+                    confirmDeleteAll()
+                }){
+                    Text("全削除")
+                        .bold()
+                        .padding()
+                        .frame(width: 100, height: 50)
+                        .foregroundColor(Color.white)
+                        .background(Color.blue)
+                        .padding()
+                }
+
+            }.padding()
+            .alert("全て削除しますか？", isPresented: $showDeleteAllAlert) {
+                Button("キャンセル", role: .cancel) {}
+                Button("削除", role: .destructive) { deleteAll() }
+            } message: {
+                Text("Numbers3 の全レコードを削除します。この操作は取り消せません。")
+            }
 
             NavigationLink(destination: Number3DsitributionMap()) {
                 Text("Numbers3 Distribution Map")
@@ -99,9 +119,25 @@ struct Numbers3Page: View {
         }
     }
     
+    private func confirmDeleteAll() {
+        showDeleteAllAlert = true
+    }
+
+    private func deleteAll() {
+        // fetchedMemoList は Numbers3 のみを取得する FetchRequest
+        for item in fetchedMemoList {
+            viewContext.delete(item)
+        }
+        do {
+            try viewContext.save()
+        } catch {
+            print("Failed to delete all: \(error)")
+        }
+    }
+    
 }
 
-struct Number3DsitributionMap:View {
+struct Number3DsitributionMap: View {
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(
             entity: Numbers.entity(),                                                    // エンティティ生成
@@ -109,44 +145,56 @@ struct Number3DsitributionMap:View {
             animation: .default
         ) var fetchedMemoList: FetchedResults<Numbers>
 
-    // 列に関する設定
-    let columns: [GridItem] = Array(repeating: .init(.flexible()), count: 11)
     var body: some View {
-        Text("Numbers3 LazyVGrid")
-        // LazyGridのヘッダー部
-        LazyVGrid(columns: columns) {
-            ForEach(0...10, id: \.self) { value in
-                if value > 0 {
-                    Text(String(format: "%d", value))
-                        .frame(width: 35, height: 25)
-                        .background(Color(red: 0.0, green: 0.0, blue: 0.0, opacity: 1.0))
-                        .font(.system(size: 17, weight: .black, design: .default))
-                        .foregroundColor(Color.white)
-                        .padding()
-                }else{
+        let columns: [GridItem] = [GridItem(.fixed(55))] + Array(repeating: GridItem(.fixed(35)), count: 10)
+        ScrollView(.horizontal) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Numbers3 LazyVGrid")
+                // Header
+                LazyVGrid(columns: columns, spacing: 0) {
                     Text("回数")
                         .frame(width: 55, height: 25)
-                        .background(Color(red: 0.0, green: 0.0, blue: 0.0, opacity: 1.0))
-                        .font(.system(size: 15, weight: .black, design: .default))
-                        .foregroundColor(Color.white)
-                        .padding()
+                        .background(Color.black)
+                        .font(.system(size: 15, weight: .black))
+                        .foregroundColor(.white)
+                    ForEach(0..<10) { value in
+                        Text("\(value)")
+                            .frame(width: 35, height: 25)
+                            .background(Color.black)
+                            .font(.system(size: 15, weight: .black))
+                            .foregroundColor(.white)
+                    }
+                }
 
+                // Rows
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 0) {
+                        ForEach(fetchedMemoList) { item in
+                            // 左端: 回数
+                            Text("\(item.numberOfTime)")
+                                .frame(width: 55, height: 25)
+                                .font(.system(size: 14, weight: .regular))
+                                .foregroundColor(.primary)
+                                .background(Color(white: 0.95))
+
+                            // 当選数字の3桁を抽出
+                            let num = Int(item.winingNumber)
+                            let d0 = (num / 100) % 10
+                            let d1 = (num / 10) % 10
+                            let d2 = num % 10
+                            let digits: Set<Int> = [d0, d1, d2]
+
+                            ForEach(0..<10) { value in
+                                Text(digits.contains(value) ? "●" : "")
+                                    .frame(width: 35, height: 25)
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(.blue)
+                                    .background(Color(white: 1.0))
+                            }
+                        }
+                    }
                 }
             }
-        }.padding()
-        
-        ScrollView {
-            LazyVGrid(columns: columns) {
-                ForEach(0...9, id: \.self) { value in
-                                         Text(String(format: "%d", value))
-                                             .frame(width: 40, height: 25)
-                                             .background(Color(red: 0.0, green: 0.0, blue: 0.0, opacity: 1.0))
-                                             .font(.system(size: 17, weight: .black, design: .default))
-                                             .foregroundColor(Color.white)
-                                             .padding()
-                      
-                }
-            }.padding()
         }
     }
 }
