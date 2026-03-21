@@ -24,7 +24,6 @@ struct Numbers3Page: View {
         ) var fetchedMemoList: FetchedResults<Numbers>
     
     @State private var selectedItem: Numbers?
-    @State private var showEditSheet = false
     @State private var showAddSheet = false
     
     var body: some View {
@@ -48,7 +47,6 @@ struct Numbers3Page: View {
                 .contextMenu {
                     Button {
                         selectedItem = item
-                        showEditSheet = true
                     } label: {
                         Label("変更", systemImage: "info.circle")
                     }
@@ -60,11 +58,9 @@ struct Numbers3Page: View {
                 }
             }
             .frame(height: 500)
-            .sheet(isPresented: $showEditSheet) {
-                if let target = selectedItem {
-                    NumbersDetailView(item: target)
-                        .environment(\.managedObjectContext, viewContext)
-                }
+            .sheet(item: $selectedItem) { target in
+                NumbersDetailView(item: target)
+                    .environment(\.managedObjectContext, viewContext)
             }
             .sheet(isPresented: $showAddSheet) {
                 NumbersCreateView()
@@ -167,6 +163,26 @@ struct NumbersDetailView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section(header: Text("詳細")) {
+                    HStack {
+                        Text("回数")
+                        Spacer()
+                        Text("\(Int(item.numberOfTime))")
+                            .foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("当選数字")
+                        Spacer()
+                        Text(String(format: "%03d", Int(item.winingNumber)))
+                            .foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("抽選日")
+                        Spacer()
+                        Text((item.timestamp ?? Date()).formatted(date: .numeric, time: .omitted))
+                            .foregroundStyle(.secondary)
+                    }
+                }
                 DatePicker("抽選日", selection: $date, displayedComponents: .date)
                 TextField("回数", text: $numberOfTimeText)
                     .keyboardType(.numberPad)
