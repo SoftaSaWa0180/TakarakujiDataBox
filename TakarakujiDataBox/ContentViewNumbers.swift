@@ -9,12 +9,16 @@ import Foundation
 import SwiftUI
 import CoreData
 
+// Numbers3メニュー
 struct Numbers3Page: View {
     @State var date = Date()
     @State var numOfTime: Int = 9999
     @State var winNumber: Int = 999
     @State var buttonText = "更新"
+    // Core DataのNSManagedObjectContextにアクセスするための環境変数
+    // ビュー内でデータの追加・削除・保存（保存）を行う際に必須のコンテキストを取得し、データベース操作を安全に行います。
     @Environment(\.managedObjectContext) private var viewContext
+    // NumbersデータベースからNumbers3のみを日付で降順でピックアップする
     @FetchRequest(
             entity: Numbers.entity(),
             sortDescriptors: [NSSortDescriptor(key: "numberOfTime", ascending: false)],
@@ -23,35 +27,42 @@ struct Numbers3Page: View {
             animation: .default
         ) var fetchedMemoList: FetchedResults<Numbers>
     
+    // 値なしもあり得るので？をつける
     @State private var selectedItem: Numbers?
     @State private var showAddSheet = false
     @State private var showDeleteAllAlert = false
     
+    // Numbers3メニュー内容を表示
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
             Text("Numbers3")
                 .font(.title)
                 .padding(.top, 8)
                 .padding(.bottom, 8)
-            //登録されているナンバーズデータ（@FetchRequest）からリスト表示する
+            //　登録されているナンバーズデータ（@FetchRequest）からリスト表示する
             List(fetchedMemoList) { item in
+                // 左端を基準に左寄せLeading）で整列
                 VStack(alignment: .leading) {
-                    Text("回数: \(item.numberOfTime)")
-                    Text("当選数字: \(item.winingNumber)")
+                    // 日付データがNULLでない場合のみ
                     if let date = item.timestamp {
                         Text("抽選日: \(date.formatted(date: .numeric, time: .omitted))")
                     }
+                    Text("回数: \(item.numberOfTime)")
+                    Text("当選数字: \(item.winingNumber)")
                 }
                 // リストの各行を長押し/押下でポップアップメニューを出す
                 // Listの各行にcontextMenuを配置
                 // リストは長押しする。
                 .contextMenu {
                     Button {
+                        // 選択リストの該当のレコードを保持
                         selectedItem = item
                     } label: {
                         Label("変更", systemImage: "info.circle")
                     }
+                    // 削除などの破壊アクションをするボタン(赤色表示)
                     Button(role: .destructive) {
+                        // Data Coreから該当レコード削除
                         delete(item)
                     } label: {
                         Label("削除", systemImage: "trash")
@@ -59,10 +70,13 @@ struct Numbers3Page: View {
                 }
             }
             .frame(height: 500)
+            // モーダル表示
+            // 特定のデータが存在するときに画面を下からスワイプアップ表示する
             .sheet(item: $selectedItem) { target in
                 NumbersDetailView(item: target)
                     .environment(\.managedObjectContext, viewContext)
             }
+            // 追加ボタンによるモーダル表示
             .sheet(isPresented: $showAddSheet) {
                 NumbersCreateView()
                     .environment(\.managedObjectContext, viewContext)
@@ -84,6 +98,7 @@ struct Numbers3Page: View {
 
                 // ボタン押下
                 Button(action: {
+                    // 全削除が押下フラグにON設定
                     confirmDeleteAll()
                 }){
                     Text("全削除")
@@ -96,6 +111,7 @@ struct Numbers3Page: View {
                 }
 
             }.padding()
+            // 全削除が押下フラグによって確認アラートを表示。アラートモデファイア実行
             .alert("全て削除しますか？", isPresented: $showDeleteAllAlert) {
                 Button("キャンセル", role: .cancel) {}
                 Button("削除", role: .destructive) { deleteAll() }
@@ -103,6 +119,7 @@ struct Numbers3Page: View {
                 Text("Numbers3 の全レコードを削除します。この操作は取り消せません。")
             }
 
+            // Numbers3分布表画面へ遷移
             NavigationLink(destination: Number3DsitributionMap()) {
                 Text("Numbers3 Distribution Map")
                     .font(.system(size:15))
@@ -110,6 +127,7 @@ struct Numbers3Page: View {
         }
     }
     
+    // レコード削除
     private func delete(_ item: Numbers) {
         viewContext.delete(item)
         do {
@@ -118,11 +136,12 @@ struct Numbers3Page: View {
             print("Failed to delete: \(error)")
         }
     }
-    
+    // 全削除が押下フラグにON設定
     private func confirmDeleteAll() {
         showDeleteAllAlert = true
     }
 
+    // Numbers3 全レコード削除
     private func deleteAll() {
         // fetchedMemoList は Numbers3 のみを取得する FetchRequest
         for item in fetchedMemoList {
@@ -180,6 +199,7 @@ struct Numbers4Page: View {
                 }
             }
             .frame(height: 500)
+            //
             .sheet(item: $selectedItem) { target in
                 Numbers4DetailView(item: target)
                     .environment(\.managedObjectContext, viewContext)
@@ -295,8 +315,11 @@ struct Number3DsitributionMap: View {
     }
 }
 
+// 既存レコードの変更画面表示
 struct NumbersDetailView: View {
+    // CoreDataを変更するためのコンテキストを取得
     @Environment(\.managedObjectContext) private var viewContext
+    // 現在のプレゼンテーションを破棄するため、環境変数から現在のインスタンスを取得する
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var item: Numbers
 
@@ -304,10 +327,19 @@ struct NumbersDetailView: View {
     @State private var numberOfTimeText: String = ""
     @State private var winNumberText: String = ""
 
+    // 内容表示
     var body: some View {
         NavigationStack {
+            // Formを使用すると画面全体を覆うスクロールリストが生成される
             Form {
+                // Section は List や From と組み合わせて使用することで、表示する項目（View）のグループ化
                 Section(header: Text("詳細")) {
+                    HStack {
+                        Text("抽選日")
+                        Spacer()
+                        Text((item.timestamp ?? Date()).formatted(date: .numeric, time: .omitted))
+                            .foregroundStyle(.secondary)
+                    }
                     HStack {
                         Text("回数")
                         Spacer()
@@ -320,13 +352,8 @@ struct NumbersDetailView: View {
                         Text(String(format: "%03d", Int(item.winingNumber)))
                             .foregroundStyle(.secondary)
                     }
-                    HStack {
-                        Text("抽選日")
-                        Spacer()
-                        Text((item.timestamp ?? Date()).formatted(date: .numeric, time: .omitted))
-                            .foregroundStyle(.secondary)
-                    }
                 }
+                // カレンダーをボタン表示
                 DatePicker("抽選日", selection: $date, displayedComponents: .date)
                 TextField("回数", text: $numberOfTimeText)
                     .keyboardType(.numberPad)
@@ -334,6 +361,7 @@ struct NumbersDetailView: View {
                     .keyboardType(.numberPad)
             }
             .navigationTitle("変更")
+            // ツールバー表示
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") { dismiss() }
@@ -349,7 +377,7 @@ struct NumbersDetailView: View {
             }
         }
     }
-
+    // 変更レコードの保存
     private func save() {
         item.timestamp = date
         let numberOfTime = Int(numberOfTimeText) ?? 0
@@ -365,6 +393,7 @@ struct NumbersDetailView: View {
     }
 }
 
+// 新規レコード追加処理
 struct NumbersCreateView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
