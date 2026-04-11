@@ -156,6 +156,7 @@ struct Numbers3Page: View {
     
 }
 
+// Numbers4　メニュー画面表示
 struct Numbers4Page: View {
     @State var date = Date()
     @State var numOfTime: Int = 9999
@@ -253,11 +254,14 @@ struct Numbers4Page: View {
     }
 }
 
+// Numbers3分布表の表示画面
 struct Number3DsitributionMap: View {
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(
             entity: Numbers.entity(),                                                    // エンティティ生成
             sortDescriptors: [NSSortDescriptor(key: "numberOfTime", ascending: false)],  // 回数でソート
+            // Numbers3 のみを対象にする
+            predicate: NSPredicate(format: "type == %d", TAKARAKUJI_LOTO_TYPE_NUMBERS3),
             animation: .default
         ) var fetchedMemoList: FetchedResults<Numbers>
 
@@ -359,6 +363,15 @@ struct NumbersDetailView: View {
                     .keyboardType(.numberPad)
                 TextField("当選数字(3桁)", text: $winNumberText)
                     .keyboardType(.numberPad)
+                    .onChange(of: winNumberText) { newValue in
+                        // 数字以外を除去し、最大3桁に制限
+                        let digits = newValue.filter { $0.isNumber }
+                        if digits.count > 3 {
+                            winNumberText = String(digits.prefix(3))
+                        } else if digits != newValue {
+                            winNumberText = digits
+                        }
+                    }
             }
             .navigationTitle("変更")
             // ツールバー表示
@@ -407,8 +420,17 @@ struct NumbersCreateView: View {
                 DatePicker("抽選日", selection: $date, displayedComponents: .date)
                 TextField("回数", text: $numberOfTimeText)
                     .keyboardType(.numberPad)
-                TextField("当選数字", text: $winNumberText)
+                TextField("当選数字(3桁)", text: $winNumberText)
                     .keyboardType(.numberPad)
+                    .onChange(of: winNumberText) { newValue in
+                        // 数字以外を除去し、最大3桁に制限
+                        let digits = newValue.filter { $0.isNumber }
+                        if digits.count > 3 {
+                            winNumberText = String(digits.prefix(3))
+                        } else if digits != newValue {
+                            winNumberText = digits
+                        }
+                    }
             }
             .navigationTitle("追加")
             .toolbar {
@@ -514,6 +536,15 @@ struct Numbers4CreateView: View {
                     .keyboardType(.numberPad)
                 TextField("当選数字(4桁)", text: $winNumberText)
                     .keyboardType(.numberPad)
+                    .onChange(of: winNumberText) { newValue in
+                        // 数字以外を除去し、最大4桁に制限
+                        let digits = newValue.filter { $0.isNumber }
+                        if digits.count > 4 {
+                            winNumberText = String(digits.prefix(4))
+                        } else if digits != newValue {
+                            winNumberText = digits
+                        }
+                    }
             }
             .navigationTitle("追加")
             .toolbar {
