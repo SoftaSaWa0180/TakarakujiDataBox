@@ -137,6 +137,102 @@ struct Numbers3Page: View {
     
 }
 
+struct Numbers4Page: View {
+    @State var date = Date()
+    @State var numOfTime: Int = 9999
+    @State var winNumber: Int = 9999
+    @State var buttonText = "更新"
+    @Environment(\.managedObjectContext) private var viewContext
+    @FetchRequest(
+            entity: Numbers.entity(),
+            sortDescriptors: [NSSortDescriptor(key: "numberOfTime", ascending: false)],
+            // ソート対象をデータタイプ（宝くじ種別）でNumbers4のみとする
+            predicate: NSPredicate(format: "type == %d", TAKARAKUJI_LOTO_TYPE_NUMBERS4),
+            animation: .default
+        ) var fetchedMemoList: FetchedResults<Numbers>
+    
+    @State private var selectedItem: Numbers?
+    @State private var showAddSheet = false
+    @State private var showDeleteAllAlert = false
+
+    var body: some View {
+        VStack(alignment: .center, spacing: 0) {
+            Text("Numbers4")
+                .font(.title)
+                .padding(.top, 8)
+                .padding(.bottom, 8)
+            // 登録されているナンバーズデータ（@FetchRequest）からリスト表示する
+            List(fetchedMemoList) { item in
+                VStack(alignment: .leading) {
+                    Text("回数: \(item.numberOfTime)")
+                    Text("当選数字: \(String(format: "%04d", Int(item.winingNumber)))")
+                    if let date = item.timestamp {
+                        Text("抽選日: \(date.formatted(date: .numeric, time: .omitted))")
+                    }
+                }
+                .contextMenu {
+                    Button { selectedItem = item } label: {
+                        Label("変更", systemImage: "info.circle")
+                    }
+                    Button(role: .destructive) { delete(item) } label: {
+                        Label("削除", systemImage: "trash")
+                    }
+                }
+            }
+            .frame(height: 500)
+            .sheet(item: $selectedItem) { target in
+                Numbers4DetailView(item: target)
+                    .environment(\.managedObjectContext, viewContext)
+            }
+            .sheet(isPresented: $showAddSheet) {
+                Numbers4CreateView()
+                    .environment(\.managedObjectContext, viewContext)
+            }
+            
+            HStack{
+                Button(action: { showAddSheet = true }){
+                    Text("追加")
+                        .bold()
+                        .padding()
+                        .frame(width: 100, height: 50)
+                        .foregroundColor(Color.white)
+                        .background(Color.blue)
+                        .padding()
+                }
+
+                Button(action: { confirmDeleteAll() }){
+                    Text("全削除")
+                        .bold()
+                        .padding()
+                        .frame(width: 100, height: 50)
+                        .foregroundColor(Color.white)
+                        .background(Color.blue)
+                        .padding()
+                }
+
+            }.padding()
+            .alert("全て削除しますか？", isPresented: $showDeleteAllAlert) {
+                Button("キャンセル", role: .cancel) {}
+                Button("削除", role: .destructive) { deleteAll() }
+            } message: {
+                Text("Numbers4 の全レコードを削除します。この操作は取り消せません。")
+            }
+        }
+    }
+
+    private func delete(_ item: Numbers) {
+        viewContext.delete(item)
+        do { try viewContext.save() } catch { print("Failed to delete: \(error)") }
+    }
+
+    private func confirmDeleteAll() { showDeleteAllAlert = true }
+
+    private func deleteAll() {
+        for item in fetchedMemoList { viewContext.delete(item) }
+        do { try viewContext.save() } catch { print("Failed to delete all: \(error)") }
+    }
+}
+
 struct Number3DsitributionMap: View {
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(
@@ -311,6 +407,102 @@ struct NumbersCreateView: View {
         } catch {
             print("Failed to save: \(error)")
         }
+    }
+}
+
+struct Numbers4DetailView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var item: Numbers
+    @State private var date: Date = Date()
+    @State private var numberOfTimeText: String = ""
+    @State private var winNumberText: String = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section(header: Text("詳細")) {
+                    HStack {
+                        Text("回数")
+                        Spacer()
+                        Text("\(Int(item.numberOfTime))")
+                            .foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("当選数字")
+                        Spacer()
+                        Text(String(format: "%04d", Int(item.winingNumber)))
+                            .foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("抽選日")
+                        Spacer()
+                        Text((item.timestamp ?? Date()).formatted(date: .numeric, time: .omitted))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                DatePicker("抽選日", selection: $date, displayedComponents: .date)
+                TextField("回数", text: $numberOfTimeText)
+                    .keyboardType(.numberPad)
+                TextField("当選数字(4桁)", text: $winNumberText)
+                    .keyboardType(.numberPad)
+            }
+            .navigationTitle("変更")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { Button("保存") { save() } }
+            }
+            .onAppear {
+                date = item.timestamp ?? Date()
+                numberOfTimeText = String(Int(item.numberOfTime))
+                winNumberText = String(Int(item.winingNumber))
+            }
+        }
+    }
+
+    private func save() {
+        item.timestamp = date
+        let numberOfTime = Int(numberOfTimeText) ?? 0
+        let winNumber = Int(winNumberText) ?? 0
+        item.numberOfTime = Int32(numberOfTime)
+        item.winingNumber = Int16(winNumber)
+        do { try viewContext.save(); dismiss() } catch { print("Failed to save: \(error)") }
+    }
+}
+
+struct Numbers4CreateView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.dismiss) private var dismiss
+    @State private var date: Date = Date()
+    @State private var numberOfTimeText: String = ""
+    @State private var winNumberText: String = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                DatePicker("抽選日", selection: $date, displayedComponents: .date)
+                TextField("回数", text: $numberOfTimeText)
+                    .keyboardType(.numberPad)
+                TextField("当選数字(4桁)", text: $winNumberText)
+                    .keyboardType(.numberPad)
+            }
+            .navigationTitle("追加")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { Button("保存") { save() } }
+            }
+        }
+    }
+
+    private func save() {
+        let num4 = Numbers(context: viewContext)
+        num4.type = Int32(TAKARAKUJI_LOTO_TYPE_NUMBERS4)
+        num4.timestamp = date
+        let numberOfTime = Int(numberOfTimeText) ?? 0
+        let winNumber = Int(winNumberText) ?? 0
+        num4.numberOfTime = Int32(numberOfTime)
+        num4.winingNumber = Int16(winNumber)
+        do { try viewContext.save(); dismiss() } catch { print("Failed to save: \(error)") }
     }
 }
 

@@ -8,9 +8,11 @@
 import SwiftUI
 import CoreData
 
+// Viewプロパティに準拠した構造体
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
+    // 画面内容の記述開始
     var body: some View {
         NavigationView {
             NavigationLink(destination: TakarakujiMenuView()) {
@@ -79,6 +81,7 @@ struct NumbersImageDisplay: View {
     }
 }
 
+// 宝くじメニュータブ表示
 struct TakarakujiMenuView: View {
   // タブの選択項目を保持する
   @State var selection = 1
@@ -106,14 +109,6 @@ struct TakarakujiMenuView: View {
                     Text("Loto7")
                 }
         }
-    }
-}
-
-struct Numbers4Page: View {
-    var body: some View {
-        Text("2枚目")
-            .font(.title)
-            .foregroundColor(.red)
     }
 }
 
