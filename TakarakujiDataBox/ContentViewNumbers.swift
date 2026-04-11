@@ -238,6 +238,12 @@ struct Numbers4Page: View {
             } message: {
                 Text("Numbers4 の全レコードを削除します。この操作は取り消せません。")
             }
+            
+            // Numbers4分布表画面へ遷移
+            NavigationLink(destination: Number4DistributionMap()) {
+                Text("Numbers4 Distribution Map")
+                    .font(.system(size:15))
+            }.padding()
         }
     }
 
@@ -303,6 +309,72 @@ struct Number3DsitributionMap: View {
                             let d1 = (num / 10) % 10
                             let d2 = num % 10
                             let digits: Set<Int> = [d0, d1, d2]
+
+                            ForEach(0..<10) { value in
+                                Text(digits.contains(value) ? "●" : "")
+                                    .frame(width: 35, height: 25)
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(.blue)
+                                    .background(Color(white: 1.0))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Numbers4分布表の表示画面
+struct Number4DistributionMap: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @FetchRequest(
+            entity: Numbers.entity(),                                                    // エンティティ生成
+            sortDescriptors: [NSSortDescriptor(key: "numberOfTime", ascending: false)],  // 回数でソート
+            // Numbers4 のみを対象にする
+            predicate: NSPredicate(format: "type == %d", TAKARAKUJI_LOTO_TYPE_NUMBERS4),
+            animation: .default
+        ) var fetchedMemoList: FetchedResults<Numbers>
+
+    var body: some View {
+        let columns: [GridItem] = [GridItem(.fixed(55))] + Array(repeating: GridItem(.fixed(35)), count: 10)
+        ScrollView(.horizontal) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Numbers4 LazyVGrid")
+                // Header
+                LazyVGrid(columns: columns, spacing: 0) {
+                    Text("回数")
+                        .frame(width: 55, height: 25)
+                        .background(Color.black)
+                        .font(.system(size: 15, weight: .black))
+                        .foregroundColor(.white)
+                    ForEach(0..<10) { value in
+                        Text("\(value)")
+                            .frame(width: 35, height: 25)
+                            .background(Color.black)
+                            .font(.system(size: 15, weight: .black))
+                            .foregroundColor(.white)
+                    }
+                }
+
+                // Rows
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 0) {
+                        ForEach(fetchedMemoList) { item in
+                            // 左端: 回数
+                            Text("\(item.numberOfTime)")
+                                .frame(width: 55, height: 25)
+                                .font(.system(size: 14, weight: .regular))
+                                .foregroundColor(.primary)
+                                .background(Color(white: 0.95))
+
+                            // 当選数字の4桁を抽出
+                            let num = Int(item.winingNumber)
+                            let d0 = (num / 1000) % 10
+                            let d1 = (num / 100) % 10
+                            let d2 = (num / 10) % 10
+                            let d3 = num % 10
+                            let digits: [Int] = [d0, d1, d2, d3]
 
                             ForEach(0..<10) { value in
                                 Text(digits.contains(value) ? "●" : "")
