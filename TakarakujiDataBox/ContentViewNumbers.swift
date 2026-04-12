@@ -162,6 +162,8 @@ struct Numbers4Page: View {
     @State var numOfTime: Int = 9999
     @State var winNumber: Int = 9999
     @State var buttonText = "更新"
+    // Core DataのNSManagedObjectContextにアクセスするための環境変数
+    // ビュー内でデータの追加・削除・保存（保存）を行う際に必須のコンテキストを取得し、データベース操作を安全に行います。
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(
             entity: Numbers.entity(),
@@ -175,6 +177,7 @@ struct Numbers4Page: View {
     @State private var showAddSheet = false
     @State private var showDeleteAllAlert = false
 
+    // 表示内容を作成
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
             Text("Numbers4")
@@ -184,12 +187,14 @@ struct Numbers4Page: View {
             // 登録されているナンバーズデータ（@FetchRequest）からリスト表示する
             List(fetchedMemoList) { item in
                 VStack(alignment: .leading) {
-                    Text("回数: \(item.numberOfTime)")
-                    Text("当選数字: \(String(format: "%04d", Int(item.winingNumber)))")
+                    // 日付データがある場合(NULLでない)
                     if let date = item.timestamp {
                         Text("抽選日: \(date.formatted(date: .numeric, time: .omitted))")
                     }
+                    Text("回数: \(item.numberOfTime)")
+                    Text("当選数字: \(String(format: "%04d", Int(item.winingNumber)))")
                 }
+                // リスト長押しで表示されるサブメニュー
                 .contextMenu {
                     Button { selectedItem = item } label: {
                         Label("変更", systemImage: "info.circle")
@@ -200,11 +205,13 @@ struct Numbers4Page: View {
                 }
             }
             .frame(height: 500)
-            //
+            // モーダル表示
+            // 特定のデータが存在するときに画面を下からスワイプアップ表示する
             .sheet(item: $selectedItem) { target in
                 Numbers4DetailView(item: target)
                     .environment(\.managedObjectContext, viewContext)
             }
+            // モーダル表示
             .sheet(isPresented: $showAddSheet) {
                 Numbers4CreateView()
                     .environment(\.managedObjectContext, viewContext)
@@ -232,6 +239,7 @@ struct Numbers4Page: View {
                 }
 
             }.padding()
+            // 全削除が押下フラグによって確認アラートを表示。アラートモデファイア実行
             .alert("全て削除しますか？", isPresented: $showDeleteAllAlert) {
                 Button("キャンセル", role: .cancel) {}
                 Button("削除", role: .destructive) { deleteAll() }
