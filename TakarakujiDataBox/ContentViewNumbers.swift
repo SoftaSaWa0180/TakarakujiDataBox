@@ -557,6 +557,7 @@ struct NumbersCreateView: View {
     }
 }
 
+// 既存レコードの変更画面表示
 struct Numbers4DetailView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
@@ -570,6 +571,12 @@ struct Numbers4DetailView: View {
             Form {
                 Section(header: Text("詳細")) {
                     HStack {
+                        Text("抽選日")
+                        Spacer()
+                        Text((item.timestamp ?? Date()).formatted(date: .numeric, time: .omitted))
+                            .foregroundStyle(.secondary)
+                    }
+                    HStack {
                         Text("回数")
                         Spacer()
                         Text("\(Int(item.numberOfTime))")
@@ -579,12 +586,6 @@ struct Numbers4DetailView: View {
                         Text("当選数字")
                         Spacer()
                         Text(String(format: "%04d", Int(item.winingNumber)))
-                            .foregroundStyle(.secondary)
-                    }
-                    HStack {
-                        Text("抽選日")
-                        Spacer()
-                        Text((item.timestamp ?? Date()).formatted(date: .numeric, time: .omitted))
                             .foregroundStyle(.secondary)
                     }
                 }
