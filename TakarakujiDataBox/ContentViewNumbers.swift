@@ -283,12 +283,20 @@ struct Number3DsitributionMap: View {
                         .background(Color.black)
                         .font(.system(size: 15, weight: .black))
                         .foregroundColor(.white)
+                        .overlay(
+                            Rectangle()
+                                .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                        )
                     ForEach(0..<10) { value in
                         Text("\(value)")
                             .frame(width: 35, height: 25)
                             .background(Color.black)
                             .font(.system(size: 15, weight: .black))
                             .foregroundColor(.white)
+                            .overlay(
+                                Rectangle()
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
                     }
                 }
 
@@ -302,6 +310,10 @@ struct Number3DsitributionMap: View {
                                 .font(.system(size: 14, weight: .regular))
                                 .foregroundColor(.primary)
                                 .background(Color(white: 0.95))
+                                .overlay(
+                                    Rectangle()
+                                        .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                                )
 
                             // 当選数字の3桁を抽出
                             let num = Int(item.winingNumber)
@@ -316,6 +328,10 @@ struct Number3DsitributionMap: View {
                                     .font(.system(size: 14, weight: .bold))
                                     .foregroundColor(.blue)
                                     .background(Color(white: 1.0))
+                                    .overlay(
+                                        Rectangle()
+                                            .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                                    )
                             }
                         }
                     }
