@@ -112,14 +112,6 @@ struct TakarakujiMenuView: View {
     }
 }
 
-struct MiniLotoPage: View {
-    var body: some View {
-        Text("2枚目")
-            .font(.title)
-            .foregroundColor(.red)
-    }
-}
-
 struct Loto7Page: View {
     var body: some View {
         Text("2枚目")

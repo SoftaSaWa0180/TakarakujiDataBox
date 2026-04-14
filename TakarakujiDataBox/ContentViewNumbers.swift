@@ -270,6 +270,8 @@ struct Numbers4Page: View {
 
 // Numbers3分布表の表示画面
 struct Number3DsitributionMap: View {
+    // Core DataのNSManagedObjectContextにアクセスするための環境変数
+    // ビュー内でデータの追加・削除・保存（保存）を行う際に必須のコンテキストを取得し、データベース操作を安全に行います。
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(
             entity: Numbers.entity(),                                                    // エンティティ生成
@@ -278,13 +280,14 @@ struct Number3DsitributionMap: View {
             predicate: NSPredicate(format: "type == %d", TAKARAKUJI_LOTO_TYPE_NUMBERS3),
             animation: .default
         ) var fetchedMemoList: FetchedResults<Numbers>
-
+    // 表示内容 グリッドレイアウトとは、コンテンツを格子状（碁盤の目のように）に配置するレイアウト方法
     var body: some View {
+        // レイアウトの設定　10カラム
         let columns: [GridItem] = [GridItem(.fixed(55))] + Array(repeating: GridItem(.fixed(35)), count: 10)
         ScrollView(.horizontal) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Numbers3 LazyVGrid")
-                // Header
+                // Header　回数・０・１・２・３....９のヘッダー部を作成
                 LazyVGrid(columns: columns, spacing: 0) {
                     Text("回数")
                         .frame(width: 55, height: 25)
@@ -295,6 +298,7 @@ struct Number3DsitributionMap: View {
                             Rectangle()
                                 .stroke(Color.gray.opacity(0.6), lineWidth: 1)
                         )
+                    // 分布をヘッダー部作成
                     ForEach(0..<10) { value in
                         Text("\(value)")
                             .frame(width: 35, height: 25)
@@ -308,7 +312,7 @@ struct Number3DsitributionMap: View {
                     }
                 }
 
-                // Rows
+                // Rows　列✖️行。行の部分を作成
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 0) {
                         ForEach(fetchedMemoList) { item in
@@ -331,6 +335,7 @@ struct Number3DsitributionMap: View {
                             let digits: Set<Int> = [d0, d1, d2]
 
                             ForEach(0..<10) { value in
+                                // 算出した各桁とカラムが一致したところに⭕️を設置する
                                 Text(digits.contains(value) ? "●" : "")
                                     .frame(width: 35, height: 25)
                                     .font(.system(size: 14, weight: .bold))

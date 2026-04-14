@@ -5,3 +5,277 @@
 //  Created by Satoshi Wakita on 2026/04/12.
 //
 
+import SwiftUI
+import CoreData
+// Mini Loto メニュー（Numbers3 と同様のレイアウトでリスト表示）
+struct MiniLotoPage: View {
+    // Core Data のコンテキスト
+    @Environment(\.managedObjectContext) private var viewContext
+
+    // Mini Loto のみを回数降順で取得
+    @FetchRequest(
+        entity: Loto.entity(),
+        sortDescriptors: [NSSortDescriptor(key: "numberOfTime", ascending: false)],
+        predicate: NSPredicate(format: "type == %d", TAKARAKUJI_LOTO_TYPE_MINI),
+        animation: .default
+    ) private var fetchedMiniLotoList: FetchedResults<Loto>
+
+    // 選択・モーダル制御
+    @State private var selectedItem: Loto?
+    @State private var showAddSheet = false
+    @State private var showDeleteAllAlert = false
+
+    var body: some View {
+        VStack(alignment: .center, spacing: 0) {
+            Text("Mini Loto")
+                .font(.title)
+                .padding(.top, 8)
+                .padding(.bottom, 8)
+
+            // 登録されているミニロトデータをリスト表示
+            List(fetchedMiniLotoList) { item in
+                VStack(alignment: .leading) {
+                    if let date = item.timestamp {
+                        Text("抽選日: \(date.formatted(date: .numeric, time: .omitted))")
+                    }
+                    Text("回数: \(item.numberOfTime)")
+                    // 当選数字: 5個 + ボーナス
+                    let n1 = Int(item.number1)
+                    let n2 = Int(item.number2)
+                    let n3 = Int(item.number3)
+                    let n4 = Int(item.number4)
+                    let n5 = Int(item.number5)
+                    let b1 = Int(item.bonusNumber1)
+                    Text("当選数字: \(n1), \(n2), \(n3), \(n4), \(n5)  ボーナス: \(b1)")
+                }
+                .contextMenu {
+                    Button { selectedItem = item } label: {
+                        Label("変更", systemImage: "info.circle")
+                    }
+                    Button(role: .destructive) { delete(item) } label: {
+                        Label("削除", systemImage: "trash")
+                    }
+                }
+            }
+            .frame(height: 500)
+            // 既存レコード編集（雛形）
+            .sheet(item: $selectedItem) { target in
+                MiniLotoDetailView(item: target)
+                    .environment(\.managedObjectContext, viewContext)
+            }
+            // 新規追加（雛形）
+            .sheet(isPresented: $showAddSheet) {
+                MiniLotoCreateView()
+                    .environment(\.managedObjectContext, viewContext)
+            }
+
+            HStack {
+                Button(action: { showAddSheet = true }) {
+                    Text("追加")
+                        .bold()
+                        .padding()
+                        .frame(width: 100, height: 50)
+                        .foregroundColor(Color.white)
+                        .background(Color.blue)
+                        .padding()
+                }
+                Button(action: { confirmDeleteAll() }) {
+                    Text("全削除")
+                        .bold()
+                        .padding()
+                        .frame(width: 100, height: 50)
+                        .foregroundColor(Color.white)
+                        .background(Color.blue)
+                        .padding()
+                }
+            }
+            .padding()
+            .alert("全て削除しますか？", isPresented: $showDeleteAllAlert) {
+                Button("キャンセル", role: .cancel) {}
+                Button("削除", role: .destructive) { deleteAll() }
+            } message: {
+                Text("Mini Loto の全レコードを削除します。この操作は取り消せません。")
+            }
+        }
+    }
+
+    // 単一削除
+    private func delete(_ item: Loto) {
+        viewContext.delete(item)
+        do { try viewContext.save() } catch { print("Failed to delete: \(error)") }
+    }
+
+    // 全削除確認
+    private func confirmDeleteAll() { showDeleteAllAlert = true }
+
+    // 全削除（Mini Loto のみ）
+    private func deleteAll() {
+        for item in fetchedMiniLotoList { viewContext.delete(item) }
+        do { try viewContext.save() } catch { print("Failed to delete all: \(error)") }
+    }
+}
+
+// 既存レコードの変更画面（最小実装の雛形）
+struct MiniLotoDetailView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var item: Loto
+
+    @State private var date: Date = Date()
+    @State private var numberOfTimeText: String = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section(header: Text("詳細")) {
+                    HStack {
+                        Text("抽選日")
+                        Spacer()
+                        Text((item.timestamp ?? Date()).formatted(date: .numeric, time: .omitted))
+                            .foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("回数")
+                        Spacer()
+                        Text("\(Int(item.numberOfTime))")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                DatePicker("抽選日", selection: $date, displayedComponents: .date)
+                TextField("回数", text: $numberOfTimeText)
+                    .keyboardType(.numberPad)
+            }
+            .navigationTitle("変更")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { Button("保存") { save() } }
+            }
+            .onAppear {
+                date = item.timestamp ?? Date()
+                numberOfTimeText = String(Int(item.numberOfTime))
+            }
+        }
+    }
+
+    private func save() {
+        item.timestamp = date
+        let numberOfTime = Int(numberOfTimeText) ?? 0
+        item.numberOfTime = Int32(numberOfTime)
+        do { try viewContext.save(); dismiss() } catch { print("Failed to save: \(error)") }
+    }
+}
+
+// 新規レコード追加（最小実装の雛形）
+struct MiniLotoCreateView: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var date: Date = Date()
+    @State private var numberOfTimeText: String = ""
+    @State private var number1Text: String = ""
+    @State private var number2Text: String = ""
+    @State private var number3Text: String = ""
+    @State private var number4Text: String = ""
+    @State private var number5Text: String = ""
+    @State private var bonusNumber1Text: String = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                DatePicker("抽選日", selection: $date, displayedComponents: .date)
+                TextField("回数", text: $numberOfTimeText)
+                    .keyboardType(.numberPad)
+
+                Section(header: Text("当選数字入力")) {
+                    TextField("本数字1", text: $number1Text)
+                        .keyboardType(.numberPad)
+                        .onChange(of: number1Text) { newValue in
+                            let digits = newValue.filter { $0.isNumber }
+                            if digits.count > 2 {
+                                number1Text = String(digits.prefix(2))
+                            } else if digits != newValue {
+                                number1Text = digits
+                            }
+                        }
+                    TextField("本数字2", text: $number2Text)
+                        .keyboardType(.numberPad)
+                        .onChange(of: number2Text) { newValue in
+                            let digits = newValue.filter { $0.isNumber }
+                            if digits.count > 2 {
+                                number2Text = String(digits.prefix(2))
+                            } else if digits != newValue {
+                                number2Text = digits
+                            }
+                        }
+                    TextField("本数字3", text: $number3Text)
+                        .keyboardType(.numberPad)
+                        .onChange(of: number3Text) { newValue in
+                            let digits = newValue.filter { $0.isNumber }
+                            if digits.count > 2 {
+                                number3Text = String(digits.prefix(2))
+                            } else if digits != newValue {
+                                number3Text = digits
+                            }
+                        }
+                    TextField("本数字4", text: $number4Text)
+                        .keyboardType(.numberPad)
+                        .onChange(of: number4Text) { newValue in
+                            let digits = newValue.filter { $0.isNumber }
+                            if digits.count > 2 {
+                                number4Text = String(digits.prefix(2))
+                            } else if digits != newValue {
+                                number4Text = digits
+                            }
+                        }
+                    TextField("本数字5", text: $number5Text)
+                        .keyboardType(.numberPad)
+                        .onChange(of: number5Text) { newValue in
+                            let digits = newValue.filter { $0.isNumber }
+                            if digits.count > 2 {
+                                number5Text = String(digits.prefix(2))
+                            } else if digits != newValue {
+                                number5Text = digits
+                            }
+                        }
+                    TextField("ボーナス", text: $bonusNumber1Text)
+                        .keyboardType(.numberPad)
+                        .onChange(of: bonusNumber1Text) { newValue in
+                            let digits = newValue.filter { $0.isNumber }
+                            if digits.count > 2 {
+                                bonusNumber1Text = String(digits.prefix(2))
+                            } else if digits != newValue {
+                                bonusNumber1Text = digits
+                            }
+                        }
+                }
+            }
+            .navigationTitle("追加")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { Button("保存") { save() } }
+            }
+        }
+    }
+
+    private func save() {
+        let mini = Loto(context: viewContext)
+        mini.type = Int32(TAKARAKUJI_LOTO_TYPE_MINI)
+        mini.timestamp = date
+        let numberOfTime = Int(numberOfTimeText) ?? 0
+        mini.numberOfTime = Int32(numberOfTime)
+        mini.number1 = Int16(Int(number1Text) ?? 0)
+        mini.number2 = Int16(Int(number2Text) ?? 0)
+        mini.number3 = Int16(Int(number3Text) ?? 0)
+        mini.number4 = Int16(Int(number4Text) ?? 0)
+        mini.number5 = Int16(Int(number5Text) ?? 0)
+        mini.bonusNumber1 = Int16(Int(bonusNumber1Text) ?? 0)
+        mini.bonusNumber2 = 0
+        do { try viewContext.save(); dismiss() } catch { print("Failed to save: \(error)") }
+    }
+}
+
+#Preview {
+    MiniLotoPage()
+        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+}
+
