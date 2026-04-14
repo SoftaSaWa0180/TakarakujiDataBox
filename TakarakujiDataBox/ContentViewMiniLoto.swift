@@ -96,6 +96,11 @@ struct MiniLotoPage: View {
             } message: {
                 Text("Mini Loto の全レコードを削除します。この操作は取り消せません。")
             }
+            // Mini Loto 分布表画面へ遷移
+            NavigationLink(destination: MiniLotoDistributionMap()) {
+                Text("Mini Loto Distribution Map")
+                    .font(.system(size:15))
+            }.padding()
         }
     }
 
@@ -271,6 +276,78 @@ struct MiniLotoCreateView: View {
         mini.bonusNumber1 = Int16(Int(bonusNumber1Text) ?? 0)
         mini.bonusNumber2 = 0
         do { try viewContext.save(); dismiss() } catch { print("Failed to save: \(error)") }
+    }
+}
+
+// Mini Loto 分布表の表示画面
+struct MiniLotoDistributionMap: View {
+    @Environment(\.managedObjectContext) private var viewContext
+    @FetchRequest(
+        entity: Loto.entity(),
+        sortDescriptors: [NSSortDescriptor(key: "numberOfTime", ascending: false)],
+        predicate: NSPredicate(format: "type == %d", TAKARAKUJI_LOTO_TYPE_MINI),
+        animation: .default
+    ) private var fetchedMiniLotoList: FetchedResults<Loto>
+
+    var body: some View {
+        // 左端: 回数 (固定幅 55)、1..31 を 31 列 (固定幅 35)
+        let columns: [GridItem] = [GridItem(.fixed(55))] + Array(repeating: GridItem(.fixed(35)), count: 31)
+        ScrollView(.horizontal) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Mini Loto LazyVGrid")
+                // Header
+                LazyVGrid(columns: columns, spacing: 0) {
+                    Text("回数")
+                        .frame(width: 55, height: 25)
+                        .background(Color.black)
+                        .font(.system(size: 15, weight: .black))
+                        .foregroundColor(.white)
+                        .overlay(Rectangle().stroke(Color.gray.opacity(0.6), lineWidth: 1))
+                    ForEach(1...31, id: \.self) { value in
+                        Text("\(value)")
+                            .frame(width: 35, height: 25)
+                            .background(Color.black)
+                            .font(.system(size: 15, weight: .black))
+                            .foregroundColor(.white)
+                            .overlay(Rectangle().stroke(Color.gray.opacity(0.6), lineWidth: 1))
+                    }
+                }
+                // Rows
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 0) {
+                        ForEach(fetchedMiniLotoList) { item in
+                            // 左端: 回数
+                            Text("\(item.numberOfTime)")
+                                .frame(width: 55, height: 25)
+                                .font(.system(size: 14, weight: .regular))
+                                .foregroundColor(.primary)
+                                .background(Color(white: 0.95))
+                                .overlay(Rectangle().stroke(Color.gray.opacity(0.6), lineWidth: 1))
+
+                            // 本数字 5 個 + ボーナス 1 個 をセットに
+                            let numbers: Set<Int> = [
+                                Int(item.number1), Int(item.number2), Int(item.number3), Int(item.number4), Int(item.number5)
+                            ]
+                            let bonus: Int = Int(item.bonusNumber1)
+
+                            ForEach(1...31, id: \.self) { value in
+                                // 本数字は青丸、ボーナス一致は赤丸、両方に該当は赤を優先
+                                let isMain = numbers.contains(value)
+                                let isBonus = (bonus == value)
+                                let symbol = (isMain || isBonus) ? "●" : ""
+                                let color: Color = isBonus ? .red : (isMain ? .blue : .clear)
+                                Text(symbol)
+                                    .frame(width: 35, height: 25)
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(color)
+                                    .background(Color(white: 1.0))
+                                    .overlay(Rectangle().stroke(Color.gray.opacity(0.6), lineWidth: 1))
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
