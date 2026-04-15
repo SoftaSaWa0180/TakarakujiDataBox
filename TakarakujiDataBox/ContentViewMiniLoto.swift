@@ -128,7 +128,14 @@ struct MiniLotoDetailView: View {
 
     @State private var date: Date = Date()
     @State private var numberOfTimeText: String = ""
+    @State private var number1Text: String = ""
+    @State private var number2Text: String = ""
+    @State private var number3Text: String = ""
+    @State private var number4Text: String = ""
+    @State private var number5Text: String = ""
+    @State private var bonusNumber1Text: String = ""
 
+    // 表示内容
     var body: some View {
         NavigationStack {
             Form {
@@ -146,18 +153,107 @@ struct MiniLotoDetailView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+                // 日付カレンダー表示、選択ツール
                 DatePicker("抽選日", selection: $date, displayedComponents: .date)
                 TextField("回数", text: $numberOfTimeText)
                     .keyboardType(.numberPad)
+
+                // 画面フォーム上のセクション名
+                Section(header: Text("当選番号（本数字）")) {
+                    // 本数字の入力箇所を横並びのIFにする
+                    HStack(spacing: 8) {
+                        TextField("1", text: $number1Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .onChange(of: number1Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                if digits.count > 2 {
+                                    number1Text = String(digits.prefix(2))
+                                } else if digits != newValue {
+                                    number1Text = digits
+                                }
+                            }
+                        TextField("2", text: $number2Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .onChange(of: number2Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                if digits.count > 2 {
+                                    number2Text = String(digits.prefix(2))
+                                } else if digits != newValue {
+                                    number2Text = digits
+                                }
+                            }
+                        TextField("3", text: $number3Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .onChange(of: number3Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                if digits.count > 2 {
+                                    number3Text = String(digits.prefix(2))
+                                } else if digits != newValue {
+                                    number3Text = digits
+                                }
+                            }
+                        TextField("4", text: $number4Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .onChange(of: number4Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                if digits.count > 2 {
+                                    number4Text = String(digits.prefix(2))
+                                } else if digits != newValue {
+                                    number4Text = digits
+                                }
+                            }
+                        TextField("5", text: $number5Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .onChange(of: number5Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                if digits.count > 2 {
+                                    number5Text = String(digits.prefix(2))
+                                } else if digits != newValue {
+                                    number5Text = digits
+                                }
+                            }
+                    }
+                }
+                // ボーナス数字だけ別セクションにする
+                Section(header: Text("ボーナス数字")) {
+                    TextField("ボーナス", text: $bonusNumber1Text)
+                        .keyboardType(.numberPad)
+                        .onChange(of: bonusNumber1Text) { newValue in
+                            let digits = newValue.filter { $0.isNumber }
+                            if digits.count > 2 {
+                                bonusNumber1Text = String(digits.prefix(2))
+                            } else if digits != newValue {
+                                bonusNumber1Text = digits
+                            }
+                        }
+                }
             }
             .navigationTitle("変更")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) { Button("保存") { save() } }
             }
+            // View表示されるタイミングで実行するアクション定義
+            // データベースから該当データを取得する
             .onAppear {
                 date = item.timestamp ?? Date()
                 numberOfTimeText = String(Int(item.numberOfTime))
+                number1Text = String(Int(item.number1))
+                number2Text = String(Int(item.number2))
+                number3Text = String(Int(item.number3))
+                number4Text = String(Int(item.number4))
+                number5Text = String(Int(item.number5))
+                bonusNumber1Text = String(Int(item.bonusNumber1))
             }
         }
     }
@@ -166,6 +262,12 @@ struct MiniLotoDetailView: View {
         item.timestamp = date
         let numberOfTime = Int(numberOfTimeText) ?? 0
         item.numberOfTime = Int32(numberOfTime)
+        item.number1 = Int16(Int(number1Text) ?? 0)
+        item.number2 = Int16(Int(number2Text) ?? 0)
+        item.number3 = Int16(Int(number3Text) ?? 0)
+        item.number4 = Int16(Int(number4Text) ?? 0)
+        item.number5 = Int16(Int(number5Text) ?? 0)
+        item.bonusNumber1 = Int16(Int(bonusNumber1Text) ?? 0)
         do { try viewContext.save(); dismiss() } catch { print("Failed to save: \(error)") }
     }
 }
