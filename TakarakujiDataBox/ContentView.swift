@@ -120,14 +120,6 @@ struct Loto7Page: View {
     }
 }
 
-struct Loto6Page: View {
-    var body: some View {
-        Text("2枚目")
-            .font(.title)
-            .foregroundColor(.red)
-    }
-}
-
 // プレビュー画面 レイアウトを確認
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
