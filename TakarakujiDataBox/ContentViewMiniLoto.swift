@@ -166,6 +166,11 @@ struct MiniLotoDetailView: View {
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.center)
                             .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
                             .onChange(of: number1Text) { newValue in
                                 let digits = newValue.filter { $0.isNumber }
                                 if digits.count > 2 {
@@ -178,6 +183,11 @@ struct MiniLotoDetailView: View {
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.center)
                             .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
                             .onChange(of: number2Text) { newValue in
                                 let digits = newValue.filter { $0.isNumber }
                                 if digits.count > 2 {
@@ -190,6 +200,11 @@ struct MiniLotoDetailView: View {
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.center)
                             .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
                             .onChange(of: number3Text) { newValue in
                                 let digits = newValue.filter { $0.isNumber }
                                 if digits.count > 2 {
@@ -202,6 +217,11 @@ struct MiniLotoDetailView: View {
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.center)
                             .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
                             .onChange(of: number4Text) { newValue in
                                 let digits = newValue.filter { $0.isNumber }
                                 if digits.count > 2 {
@@ -214,6 +234,11 @@ struct MiniLotoDetailView: View {
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.center)
                             .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
                             .onChange(of: number5Text) { newValue in
                                 let digits = newValue.filter { $0.isNumber }
                                 if digits.count > 2 {
@@ -294,58 +319,104 @@ struct MiniLotoCreateView: View {
                     .keyboardType(.numberPad)
 
                 Section(header: Text("当選数字入力")) {
-                    TextField("本数字1", text: $number1Text)
-                        .keyboardType(.numberPad)
-                        .onChange(of: number1Text) { newValue in
-                            let digits = newValue.filter { $0.isNumber }
-                            if digits.count > 2 {
-                                number1Text = String(digits.prefix(2))
-                            } else if digits != newValue {
-                                number1Text = digits
+                    // 本数字 5 個を横一列に、各フィールドに枠線を付与
+                    HStack(spacing: 8) {
+                        TextField("1", text: $number1Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
+                            .onChange(of: number1Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                if digits.count > 2 {
+                                    number1Text = String(digits.prefix(2))
+                                } else if digits != newValue {
+                                    number1Text = digits
+                                }
                             }
-                        }
-                    TextField("本数字2", text: $number2Text)
-                        .keyboardType(.numberPad)
-                        .onChange(of: number2Text) { newValue in
-                            let digits = newValue.filter { $0.isNumber }
-                            if digits.count > 2 {
-                                number2Text = String(digits.prefix(2))
-                            } else if digits != newValue {
-                                number2Text = digits
+                        TextField("2", text: $number2Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
+                            .onChange(of: number2Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                if digits.count > 2 {
+                                    number2Text = String(digits.prefix(2))
+                                } else if digits != newValue {
+                                    number2Text = digits
+                                }
                             }
-                        }
-                    TextField("本数字3", text: $number3Text)
-                        .keyboardType(.numberPad)
-                        .onChange(of: number3Text) { newValue in
-                            let digits = newValue.filter { $0.isNumber }
-                            if digits.count > 2 {
-                                number3Text = String(digits.prefix(2))
-                            } else if digits != newValue {
-                                number3Text = digits
+                        TextField("3", text: $number3Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
+                            .onChange(of: number3Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                if digits.count > 2 {
+                                    number3Text = String(digits.prefix(2))
+                                } else if digits != newValue {
+                                    number3Text = digits
+                                }
                             }
-                        }
-                    TextField("本数字4", text: $number4Text)
-                        .keyboardType(.numberPad)
-                        .onChange(of: number4Text) { newValue in
-                            let digits = newValue.filter { $0.isNumber }
-                            if digits.count > 2 {
-                                number4Text = String(digits.prefix(2))
-                            } else if digits != newValue {
-                                number4Text = digits
+                        TextField("4", text: $number4Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
+                            .onChange(of: number4Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                if digits.count > 2 {
+                                    number4Text = String(digits.prefix(2))
+                                } else if digits != newValue {
+                                    number4Text = digits
+                                }
                             }
-                        }
-                    TextField("本数字5", text: $number5Text)
-                        .keyboardType(.numberPad)
-                        .onChange(of: number5Text) { newValue in
-                            let digits = newValue.filter { $0.isNumber }
-                            if digits.count > 2 {
-                                number5Text = String(digits.prefix(2))
-                            } else if digits != newValue {
-                                number5Text = digits
+                        TextField("5", text: $number5Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
+                            .onChange(of: number5Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                if digits.count > 2 {
+                                    number5Text = String(digits.prefix(2))
+                                } else if digits != newValue {
+                                    number5Text = digits
+                                }
                             }
-                        }
+                    }
+                    // ボーナスは別行に枠付きで
                     TextField("ボーナス", text: $bonusNumber1Text)
                         .keyboardType(.numberPad)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 120)
+                        .padding(6)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                        )
                         .onChange(of: bonusNumber1Text) { newValue in
                             let digits = newValue.filter { $0.isNumber }
                             if digits.count > 2 {
