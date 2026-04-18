@@ -253,7 +253,7 @@ struct Loto6CreateView: View {
                         }
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.center)
-                        .frame(width: 44)
+                        .frame(width: 40)
                         .padding(6)
                         .overlay(
                             RoundedRectangle(cornerRadius: 6)
