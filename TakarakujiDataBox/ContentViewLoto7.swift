@@ -16,6 +16,7 @@ struct Loto7Page: View {
     @State private var showAddSheet = false
     @State private var showDeleteAllAlert = false
 
+    // 表示内容
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
             Text("Loto 7")
@@ -25,6 +26,7 @@ struct Loto7Page: View {
 
             List(fetchedLoto7List) { item in
                 VStack(alignment: .leading) {
+                    // 日付データありの場合
                     if let date = item.timestamp {
                         Text("抽選日: \(date.formatted(date: .numeric, time: .omitted))")
                     }
@@ -149,6 +151,9 @@ struct Loto7DetailView: View {
                     .keyboardType(.numberPad)
 
                 Section(header: Text("当選番号（本数字）")) {
+                    Text("1から37までの数字を1つずつ入力してください")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
                     HStack(spacing: 8) {
                         Group {
                             TextField("1", text: $number1Text)
@@ -242,11 +247,26 @@ struct Loto7CreateView: View {
                     .keyboardType(.numberPad)
 
                 Section(header: Text("当選数字入力")) {
+                    Text("1から37までの数字を1つずつ入力してください")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
                     HStack(spacing: 8) {
                         Group {
                             TextField("1", text: $number1Text)
                             TextField("2", text: $number2Text)
                             TextField("3", text: $number3Text)
+                        }
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.center)
+                        .frame(width: 40)
+                        .padding(6)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                        )
+                    }
+                    HStack(spacing: 8) {
+                        Group {
                             TextField("4", text: $number4Text)
                             TextField("5", text: $number5Text)
                             TextField("6", text: $number6Text)
@@ -261,6 +281,7 @@ struct Loto7CreateView: View {
                                 .stroke(Color.gray.opacity(0.6), lineWidth: 1)
                         )
                     }
+
                     HStack(spacing: 8) {
                         TextField("ボーナス1", text: $bonusNumber1Text)
                             .keyboardType(.numberPad)

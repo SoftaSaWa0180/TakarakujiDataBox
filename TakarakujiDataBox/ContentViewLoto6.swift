@@ -153,6 +153,9 @@ struct Loto6DetailView: View {
                     .keyboardType(.numberPad)
 
                 Section(header: Text("当選番号（本数字）")) {
+                    Text("1から43までの数字を1つずつ入力してください")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
                     HStack(spacing: 8) {
                         Group {
                             TextField("1", text: $number1Text)
@@ -242,6 +245,9 @@ struct Loto6CreateView: View {
                     .keyboardType(.numberPad)
 
                 Section(header: Text("当選数字入力")) {
+                    Text("1から43までの数字を1つずつ入力してください")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
                     HStack(spacing: 8) {
                         Group {
                             TextField("1", text: $number1Text)
