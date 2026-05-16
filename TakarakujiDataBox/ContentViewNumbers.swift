@@ -598,7 +598,17 @@ struct Numbers4DetailView: View {
                 TextField("回数", text: $numberOfTimeText)
                     .keyboardType(.numberPad)
                 TextField("当選数字(4桁)", text: $winNumberText)
+                    // テキスト入力で数字パッドのみ有効
                     .keyboardType(.numberPad)
+                    .onChange(of: winNumberText) { newValue in
+                        // 数字以外を除去し、最大4桁に制限. 数字（0〜9）のみを抽出（フィルタリング）
+                        let digits = newValue.filter { $0.isNumber }
+                        if digits.count > 4 {
+                            winNumberText = String(digits.prefix(4))
+                        } else if digits != newValue {
+                            winNumberText = digits
+                        }
+                    }
             }
             .navigationTitle("変更")
             .toolbar {
@@ -616,7 +626,10 @@ struct Numbers4DetailView: View {
     private func save() {
         item.timestamp = date
         let numberOfTime = Int(numberOfTimeText) ?? 0
-        let winNumber = Int(winNumberText) ?? 0
+        // 安全側で4桁の数字に制限して保存
+        let sanitized = winNumberText.filter { $0.isNumber }
+        let limited = String(sanitized.prefix(4))
+        let winNumber = Int(limited) ?? 0
         item.numberOfTime = Int32(numberOfTime)
         item.winingNumber = Int16(winNumber)
         do { try viewContext.save(); dismiss() } catch { print("Failed to save: \(error)") }

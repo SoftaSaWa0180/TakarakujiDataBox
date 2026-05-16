@@ -52,7 +52,6 @@ struct Loto7Page: View {
                     }
                 }
             }
-            .frame(height: 500)
             .sheet(item: $selectedItem) { target in
                 Loto7DetailView(item: target)
                     .environment(\.managedObjectContext, viewContext)
@@ -155,30 +154,181 @@ struct Loto7DetailView: View {
                         .font(.footnote)
                         .foregroundColor(.secondary)
                     HStack(spacing: 8) {
-                        Group {
-                            TextField("1", text: $number1Text)
-                            TextField("2", text: $number2Text)
-                            TextField("3", text: $number3Text)
-                            TextField("4", text: $number4Text)
-                            TextField("5", text: $number5Text)
-                            TextField("6", text: $number6Text)
-                            TextField("7", text: $number7Text)
-                        }
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.center)
-                        .frame(width: 44)
-                        .padding(6)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(Color.gray.opacity(0.6), lineWidth: 1)
-                        )
+                        TextField("1", text: $number1Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
+                            .onChange(of: number1Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 37 {
+                                    number1Text = "37"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number1Text = "1"
+                                } else if trimmed != newValue {
+                                    number1Text = trimmed
+                                }
+                            }
+                        TextField("2", text: $number2Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
+                            .onChange(of: number2Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 37 {
+                                    number2Text = "37"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number2Text = "1"
+                                } else if trimmed != newValue {
+                                    number2Text = trimmed
+                                }
+                            }
+                        TextField("3", text: $number3Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
+                            .onChange(of: number3Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 37 {
+                                    number3Text = "37"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number3Text = "1"
+                                } else if trimmed != newValue {
+                                    number3Text = trimmed
+                                }
+                            }
+                    }
+                    HStack(spacing: 8) {
+                        TextField("4", text: $number4Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
+                            .onChange(of: number4Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 37 {
+                                    number4Text = "37"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number4Text = "1"
+                                } else if trimmed != newValue {
+                                    number4Text = trimmed
+                                }
+                            }
+                        TextField("5", text: $number5Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
+                            .onChange(of: number5Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 37 {
+                                    number5Text = "37"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number5Text = "1"
+                                } else if trimmed != newValue {
+                                    number5Text = trimmed
+                                }
+                            }
+                        TextField("6", text: $number6Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
+                            .onChange(of: number6Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 37 {
+                                    number6Text = "37"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number6Text = "1"
+                                } else if trimmed != newValue {
+                                    number6Text = trimmed
+                                }
+                            }
+                        TextField("7", text: $number7Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 44)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                            )
+                            .onChange(of: number7Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 37 {
+                                    number7Text = "37"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number7Text = "1"
+                                } else if trimmed != newValue {
+                                    number7Text = trimmed
+                                }
+                            }
                     }
                 }
 
                 Section(header: Text("ボーナス数字")) {
                     HStack(spacing: 8) {
                         TextField("ボーナス1", text: $bonusNumber1Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .onChange(of: bonusNumber1Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 37 {
+                                    bonusNumber1Text = "37"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    bonusNumber1Text = "1"
+                                } else if trimmed != newValue {
+                                    bonusNumber1Text = trimmed
+                                }
+                            }
                         TextField("ボーナス2", text: $bonusNumber2Text)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.center)
+                            .onChange(of: bonusNumber2Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 37 {
+                                    bonusNumber2Text = "37"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    bonusNumber2Text = "1"
+                                } else if trimmed != newValue {
+                                    bonusNumber2Text = trimmed
+                                }
+                            }
                     }
                     .keyboardType(.numberPad)
                     .multilineTextAlignment(.center)
@@ -209,15 +359,21 @@ struct Loto7DetailView: View {
         item.timestamp = date
         let numberOfTime = Int(numberOfTimeText) ?? 0
         item.numberOfTime = Int32(numberOfTime)
-        item.number1 = Int16(Int(number1Text) ?? 0)
-        item.number2 = Int16(Int(number2Text) ?? 0)
-        item.number3 = Int16(Int(number3Text) ?? 0)
-        item.number4 = Int16(Int(number4Text) ?? 0)
-        item.number5 = Int16(Int(number5Text) ?? 0)
-        item.number6 = Int16(Int(number6Text) ?? 0)
-        item.number7 = Int16(Int(number7Text) ?? 0)
-        item.bonusNumber1 = Int16(Int(bonusNumber1Text) ?? 0)
-        item.bonusNumber2 = Int16(Int(bonusNumber2Text) ?? 0)
+        func to1to37(_ s: String) -> Int16 {
+            let n = Int(s) ?? 0
+            if n <= 0 { return 1 }
+            if n > 37 { return 37 }
+            return Int16(n)
+        }
+        item.number1 = to1to37(number1Text)
+        item.number2 = to1to37(number2Text)
+        item.number3 = to1to37(number3Text)
+        item.number4 = to1to37(number4Text)
+        item.number5 = to1to37(number5Text)
+        item.number6 = to1to37(number6Text)
+        item.number7 = to1to37(number7Text)
+        item.bonusNumber1 = to1to37(bonusNumber1Text)
+        item.bonusNumber2 = to1to37(bonusNumber2Text)
         do { try viewContext.save(); dismiss() } catch { print("Failed to save: \(error)") }
     }
 }
@@ -253,33 +409,150 @@ struct Loto7CreateView: View {
                     HStack(spacing: 8) {
                         Group {
                             TextField("1", text: $number1Text)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.center)
+                                .frame(width: 40)
+                                .padding(6)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                                )
+                                .onChange(of: number1Text) { newValue in
+                                    let digits = newValue.filter { $0.isNumber }
+                                    let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                    if let val = Int(trimmed), val > 37 {
+                                        number1Text = "37"
+                                    } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                        number1Text = "1"
+                                    } else if trimmed != newValue {
+                                        number1Text = trimmed
+                                    }
+                                }
                             TextField("2", text: $number2Text)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.center)
+                                .frame(width: 40)
+                                .padding(6)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                                )
+                                .onChange(of: number2Text) { newValue in
+                                    let digits = newValue.filter { $0.isNumber }
+                                    let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                    if let val = Int(trimmed), val > 37 {
+                                        number2Text = "37"
+                                    } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                        number2Text = "1"
+                                    } else if trimmed != newValue {
+                                        number2Text = trimmed
+                                    }
+                                }
                             TextField("3", text: $number3Text)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.center)
+                                .frame(width: 40)
+                                .padding(6)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                                )
+                                .onChange(of: number3Text) { newValue in
+                                    let digits = newValue.filter { $0.isNumber }
+                                    let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                    if let val = Int(trimmed), val > 37 {
+                                        number3Text = "37"
+                                    } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                        number3Text = "1"
+                                    } else if trimmed != newValue {
+                                        number3Text = trimmed
+                                    }
+                                }
                         }
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.center)
-                        .frame(width: 40)
-                        .padding(6)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(Color.gray.opacity(0.6), lineWidth: 1)
-                        )
                     }
                     HStack(spacing: 8) {
                         Group {
                             TextField("4", text: $number4Text)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.center)
+                                .frame(width: 40)
+                                .padding(6)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                                )
+                                .onChange(of: number4Text) { newValue in
+                                    let digits = newValue.filter { $0.isNumber }
+                                    let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                    if let val = Int(trimmed), val > 37 {
+                                        number4Text = "37"
+                                    } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                        number4Text = "1"
+                                    } else if trimmed != newValue {
+                                        number4Text = trimmed
+                                    }
+                                }
                             TextField("5", text: $number5Text)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.center)
+                                .frame(width: 40)
+                                .padding(6)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                                )
+                                .onChange(of: number5Text) { newValue in
+                                    let digits = newValue.filter { $0.isNumber }
+                                    let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                    if let val = Int(trimmed), val > 37 {
+                                        number5Text = "37"
+                                    } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                        number5Text = "1"
+                                    } else if trimmed != newValue {
+                                        number5Text = trimmed
+                                    }
+                                }
                             TextField("6", text: $number6Text)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.center)
+                                .frame(width: 40)
+                                .padding(6)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                                )
+                                .onChange(of: number6Text) { newValue in
+                                    let digits = newValue.filter { $0.isNumber }
+                                    let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                    if let val = Int(trimmed), val > 37 {
+                                        number6Text = "37"
+                                    } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                        number6Text = "1"
+                                    } else if trimmed != newValue {
+                                        number6Text = trimmed
+                                    }
+                                }
                             TextField("7", text: $number7Text)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.center)
+                                .frame(width: 40)
+                                .padding(6)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(Color.gray.opacity(0.6), lineWidth: 1)
+                                )
+                                .onChange(of: number7Text) { newValue in
+                                    let digits = newValue.filter { $0.isNumber }
+                                    let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                    if let val = Int(trimmed), val > 37 {
+                                        number7Text = "37"
+                                    } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                        number7Text = "1"
+                                    } else if trimmed != newValue {
+                                        number7Text = trimmed
+                                    }
+                                }
                         }
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.center)
-                        .frame(width: 40)
-                        .padding(6)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(Color.gray.opacity(0.6), lineWidth: 1)
-                        )
                     }
 
                     HStack(spacing: 8) {
@@ -292,6 +565,17 @@ struct Loto7CreateView: View {
                                 RoundedRectangle(cornerRadius: 6)
                                     .stroke(Color.gray.opacity(0.6), lineWidth: 1)
                             )
+                            .onChange(of: bonusNumber1Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 37 {
+                                    bonusNumber1Text = "37"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    bonusNumber1Text = "1"
+                                } else if trimmed != newValue {
+                                    bonusNumber1Text = trimmed
+                                }
+                            }
                         TextField("ボーナス2", text: $bonusNumber2Text)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.center)
@@ -301,6 +585,17 @@ struct Loto7CreateView: View {
                                 RoundedRectangle(cornerRadius: 6)
                                     .stroke(Color.gray.opacity(0.6), lineWidth: 1)
                             )
+                            .onChange(of: bonusNumber2Text) { newValue in
+                                let digits = newValue.filter { $0.isNumber }
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 37 {
+                                    bonusNumber2Text = "37"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    bonusNumber2Text = "1"
+                                } else if trimmed != newValue {
+                                    bonusNumber2Text = trimmed
+                                }
+                            }
                     }
                 }
             }
@@ -318,15 +613,21 @@ struct Loto7CreateView: View {
         loto.timestamp = date
         let numberOfTime = Int(numberOfTimeText) ?? 0
         loto.numberOfTime = Int32(numberOfTime)
-        loto.number1 = Int16(Int(number1Text) ?? 0)
-        loto.number2 = Int16(Int(number2Text) ?? 0)
-        loto.number3 = Int16(Int(number3Text) ?? 0)
-        loto.number4 = Int16(Int(number4Text) ?? 0)
-        loto.number5 = Int16(Int(number5Text) ?? 0)
-        loto.number6 = Int16(Int(number6Text) ?? 0)
-        loto.number7 = Int16(Int(number7Text) ?? 0)
-        loto.bonusNumber1 = Int16(Int(bonusNumber1Text) ?? 0)
-        loto.bonusNumber2 = Int16(Int(bonusNumber2Text) ?? 0)
+        func to1to37(_ s: String) -> Int16 {
+            let n = Int(s) ?? 0
+            if n <= 0 { return 1 }
+            if n > 37 { return 37 }
+            return Int16(n)
+        }
+        loto.number1 = to1to37(number1Text)
+        loto.number2 = to1to37(number2Text)
+        loto.number3 = to1to37(number3Text)
+        loto.number4 = to1to37(number4Text)
+        loto.number5 = to1to37(number5Text)
+        loto.number6 = to1to37(number6Text)
+        loto.number7 = to1to37(number7Text)
+        loto.bonusNumber1 = to1to37(bonusNumber1Text)
+        loto.bonusNumber2 = to1to37(bonusNumber2Text)
         do { try viewContext.save(); dismiss() } catch { print("Failed to save: \(error)") }
     }
 }
@@ -344,7 +645,7 @@ struct Loto7DistributionMap: View {
     var body: some View {
         // 左端: 回数 (固定幅 55)、1..37 を 37 列 (固定幅 35)
         let columns: [GridItem] = [GridItem(.fixed(55))] + Array(repeating: GridItem(.fixed(35)), count: 37)
-        ScrollView(.horizontal) {
+        ScrollView([.horizontal, .vertical]) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Loto 7 LazyVGrid")
                 LazyVGrid(columns: columns, spacing: 0) {
@@ -363,34 +664,32 @@ struct Loto7DistributionMap: View {
                             .overlay(Rectangle().stroke(Color.gray.opacity(0.6), lineWidth: 1))
                     }
                 }
-                ScrollView {
-                    LazyVGrid(columns: columns, spacing: 0) {
-                        ForEach(fetchedLoto7List) { item in
-                            Text("\(item.numberOfTime)")
-                                .frame(width: 55, height: 25)
-                                .font(.system(size: 14, weight: .regular))
-                                .foregroundColor(.primary)
-                                .background(Color(white: 0.95))
+                LazyVGrid(columns: columns, spacing: 0) {
+                    ForEach(fetchedLoto7List) { item in
+                        Text("\(item.numberOfTime)")
+                            .frame(width: 55, height: 25)
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundColor(.primary)
+                            .background(Color(white: 0.95))
+                            .overlay(Rectangle().stroke(Color.gray.opacity(0.6), lineWidth: 1))
+
+                        let numbers: Set<Int> = [
+                            Int(item.number1), Int(item.number2), Int(item.number3), Int(item.number4), Int(item.number5), Int(item.number6), Int(item.number7)
+                        ]
+                        let bonus1: Int = Int(item.bonusNumber1)
+                        let bonus2: Int = Int(item.bonusNumber2)
+
+                        ForEach(1...37, id: \.self) { value in
+                            let isMain = numbers.contains(value)
+                            let isBonus = (bonus1 == value) || (bonus2 == value)
+                            let symbol = (isMain || isBonus) ? "●" : ""
+                            let color: Color = isBonus ? .red : (isMain ? .blue : .clear)
+                            Text(symbol)
+                                .frame(width: 35, height: 25)
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(color)
+                                .background(Color(white: 1.0))
                                 .overlay(Rectangle().stroke(Color.gray.opacity(0.6), lineWidth: 1))
-
-                            let numbers: Set<Int> = [
-                                Int(item.number1), Int(item.number2), Int(item.number3), Int(item.number4), Int(item.number5), Int(item.number6), Int(item.number7)
-                            ]
-                            let bonus1: Int = Int(item.bonusNumber1)
-                            let bonus2: Int = Int(item.bonusNumber2)
-
-                            ForEach(1...37, id: \.self) { value in
-                                let isMain = numbers.contains(value)
-                                let isBonus = (bonus1 == value) || (bonus2 == value)
-                                let symbol = (isMain || isBonus) ? "●" : ""
-                                let color: Color = isBonus ? .red : (isMain ? .blue : .clear)
-                                Text(symbol)
-                                    .frame(width: 35, height: 25)
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(color)
-                                    .background(Color(white: 1.0))
-                                    .overlay(Rectangle().stroke(Color.gray.opacity(0.6), lineWidth: 1))
-                            }
                         }
                     }
                 }

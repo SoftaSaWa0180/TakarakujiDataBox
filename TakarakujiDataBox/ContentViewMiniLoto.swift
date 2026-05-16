@@ -160,6 +160,9 @@ struct MiniLotoDetailView: View {
 
                 // 画面フォーム上のセクション名
                 Section(header: Text("当選番号（本数字）")) {
+                    Text("1から31までの数字を1つずつ入力してください")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
                     // 本数字の入力箇所を横並びのIFにする
                     HStack(spacing: 8) {
                         TextField("1", text: $number1Text)
@@ -171,12 +174,20 @@ struct MiniLotoDetailView: View {
                                 RoundedRectangle(cornerRadius: 6)
                                     .stroke(Color.gray.opacity(0.6), lineWidth: 1)
                             )
+                            // 値が変更された時に処理を実行するためのモディファイア
                             .onChange(of: number1Text) { newValue in
+                                // 0-9の数字のみ有効
                                 let digits = newValue.filter { $0.isNumber }
-                                if digits.count > 2 {
-                                    number1Text = String(digits.prefix(2))
-                                } else if digits != newValue {
-                                    number1Text = digits
+                                // 桁数は２桁制限
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                // 1-31の値域チェック
+                                if let val = Int(trimmed), val > 31 {
+                                    number1Text = "31"
+                                // 当選番号が空入力の場合は、オール１
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number1Text = "1"
+                                } else if trimmed != newValue {
+                                    number1Text = trimmed
                                 }
                             }
                         TextField("2", text: $number2Text)
@@ -190,10 +201,13 @@ struct MiniLotoDetailView: View {
                             )
                             .onChange(of: number2Text) { newValue in
                                 let digits = newValue.filter { $0.isNumber }
-                                if digits.count > 2 {
-                                    number2Text = String(digits.prefix(2))
-                                } else if digits != newValue {
-                                    number2Text = digits
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 31 {
+                                    number2Text = "31"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number2Text = "1"
+                                } else if trimmed != newValue {
+                                    number2Text = trimmed
                                 }
                             }
                         TextField("3", text: $number3Text)
@@ -207,10 +221,13 @@ struct MiniLotoDetailView: View {
                             )
                             .onChange(of: number3Text) { newValue in
                                 let digits = newValue.filter { $0.isNumber }
-                                if digits.count > 2 {
-                                    number3Text = String(digits.prefix(2))
-                                } else if digits != newValue {
-                                    number3Text = digits
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 31 {
+                                    number3Text = "31"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number3Text = "1"
+                                } else if trimmed != newValue {
+                                    number3Text = trimmed
                                 }
                             }
                         TextField("4", text: $number4Text)
@@ -224,10 +241,13 @@ struct MiniLotoDetailView: View {
                             )
                             .onChange(of: number4Text) { newValue in
                                 let digits = newValue.filter { $0.isNumber }
-                                if digits.count > 2 {
-                                    number4Text = String(digits.prefix(2))
-                                } else if digits != newValue {
-                                    number4Text = digits
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 31 {
+                                    number4Text = "31"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number4Text = "1"
+                                } else if trimmed != newValue {
+                                    number4Text = trimmed
                                 }
                             }
                         TextField("5", text: $number5Text)
@@ -241,10 +261,13 @@ struct MiniLotoDetailView: View {
                             )
                             .onChange(of: number5Text) { newValue in
                                 let digits = newValue.filter { $0.isNumber }
-                                if digits.count > 2 {
-                                    number5Text = String(digits.prefix(2))
-                                } else if digits != newValue {
-                                    number5Text = digits
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 31 {
+                                    number5Text = "31"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number5Text = "1"
+                                } else if trimmed != newValue {
+                                    number5Text = trimmed
                                 }
                             }
                     }
@@ -255,10 +278,13 @@ struct MiniLotoDetailView: View {
                         .keyboardType(.numberPad)
                         .onChange(of: bonusNumber1Text) { newValue in
                             let digits = newValue.filter { $0.isNumber }
-                            if digits.count > 2 {
-                                bonusNumber1Text = String(digits.prefix(2))
-                            } else if digits != newValue {
-                                bonusNumber1Text = digits
+                            let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                            if let val = Int(trimmed), val > 31 {
+                                bonusNumber1Text = "31"
+                            } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                bonusNumber1Text = "1"
+                            } else if trimmed != newValue {
+                                bonusNumber1Text = trimmed
                             }
                         }
                 }
@@ -287,12 +313,18 @@ struct MiniLotoDetailView: View {
         item.timestamp = date
         let numberOfTime = Int(numberOfTimeText) ?? 0
         item.numberOfTime = Int32(numberOfTime)
-        item.number1 = Int16(Int(number1Text) ?? 0)
-        item.number2 = Int16(Int(number2Text) ?? 0)
-        item.number3 = Int16(Int(number3Text) ?? 0)
-        item.number4 = Int16(Int(number4Text) ?? 0)
-        item.number5 = Int16(Int(number5Text) ?? 0)
-        item.bonusNumber1 = Int16(Int(bonusNumber1Text) ?? 0)
+        func to1to31(_ s: String) -> Int16 {
+            let n = Int(s) ?? 0
+            if n <= 0 { return 1 }
+            if n > 31 { return 31 }
+            return Int16(n)
+        }
+        item.number1 = to1to31(number1Text)
+        item.number2 = to1to31(number2Text)
+        item.number3 = to1to31(number3Text)
+        item.number4 = to1to31(number4Text)
+        item.number5 = to1to31(number5Text)
+        item.bonusNumber1 = to1to31(bonusNumber1Text)
         do { try viewContext.save(); dismiss() } catch { print("Failed to save: \(error)") }
     }
 }
@@ -319,6 +351,9 @@ struct MiniLotoCreateView: View {
                     .keyboardType(.numberPad)
 
                 Section(header: Text("当選数字入力")) {
+                    Text("1から31までの数字を1つずつ入力してください")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
                     // 本数字 5 個を横一列に、各フィールドに枠線を付与
                     HStack(spacing: 8) {
                         TextField("1", text: $number1Text)
@@ -332,10 +367,13 @@ struct MiniLotoCreateView: View {
                             )
                             .onChange(of: number1Text) { newValue in
                                 let digits = newValue.filter { $0.isNumber }
-                                if digits.count > 2 {
-                                    number1Text = String(digits.prefix(2))
-                                } else if digits != newValue {
-                                    number1Text = digits
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 31 {
+                                    number1Text = "31"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number1Text = "1"
+                                } else if trimmed != newValue {
+                                    number1Text = trimmed
                                 }
                             }
                         TextField("2", text: $number2Text)
@@ -349,10 +387,13 @@ struct MiniLotoCreateView: View {
                             )
                             .onChange(of: number2Text) { newValue in
                                 let digits = newValue.filter { $0.isNumber }
-                                if digits.count > 2 {
-                                    number2Text = String(digits.prefix(2))
-                                } else if digits != newValue {
-                                    number2Text = digits
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 31 {
+                                    number2Text = "31"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number2Text = "1"
+                                } else if trimmed != newValue {
+                                    number2Text = trimmed
                                 }
                             }
                         TextField("3", text: $number3Text)
@@ -366,10 +407,13 @@ struct MiniLotoCreateView: View {
                             )
                             .onChange(of: number3Text) { newValue in
                                 let digits = newValue.filter { $0.isNumber }
-                                if digits.count > 2 {
-                                    number3Text = String(digits.prefix(2))
-                                } else if digits != newValue {
-                                    number3Text = digits
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 31 {
+                                    number3Text = "31"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number3Text = "1"
+                                } else if trimmed != newValue {
+                                    number3Text = trimmed
                                 }
                             }
                         TextField("4", text: $number4Text)
@@ -383,10 +427,13 @@ struct MiniLotoCreateView: View {
                             )
                             .onChange(of: number4Text) { newValue in
                                 let digits = newValue.filter { $0.isNumber }
-                                if digits.count > 2 {
-                                    number4Text = String(digits.prefix(2))
-                                } else if digits != newValue {
-                                    number4Text = digits
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 31 {
+                                    number4Text = "31"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number4Text = "1"
+                                } else if trimmed != newValue {
+                                    number4Text = trimmed
                                 }
                             }
                         TextField("5", text: $number5Text)
@@ -400,10 +447,13 @@ struct MiniLotoCreateView: View {
                             )
                             .onChange(of: number5Text) { newValue in
                                 let digits = newValue.filter { $0.isNumber }
-                                if digits.count > 2 {
-                                    number5Text = String(digits.prefix(2))
-                                } else if digits != newValue {
-                                    number5Text = digits
+                                let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                                if let val = Int(trimmed), val > 31 {
+                                    number5Text = "31"
+                                } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                    number5Text = "1"
+                                } else if trimmed != newValue {
+                                    number5Text = trimmed
                                 }
                             }
                     }
@@ -419,10 +469,13 @@ struct MiniLotoCreateView: View {
                         )
                         .onChange(of: bonusNumber1Text) { newValue in
                             let digits = newValue.filter { $0.isNumber }
-                            if digits.count > 2 {
-                                bonusNumber1Text = String(digits.prefix(2))
-                            } else if digits != newValue {
-                                bonusNumber1Text = digits
+                            let trimmed = digits.count > 2 ? String(digits.prefix(2)) : digits
+                            if let val = Int(trimmed), val > 31 {
+                                bonusNumber1Text = "31"
+                            } else if let val = Int(trimmed), val < 1 && !trimmed.isEmpty {
+                                bonusNumber1Text = "1"
+                            } else if trimmed != newValue {
+                                bonusNumber1Text = trimmed
                             }
                         }
                 }
@@ -441,12 +494,18 @@ struct MiniLotoCreateView: View {
         mini.timestamp = date
         let numberOfTime = Int(numberOfTimeText) ?? 0
         mini.numberOfTime = Int32(numberOfTime)
-        mini.number1 = Int16(Int(number1Text) ?? 0)
-        mini.number2 = Int16(Int(number2Text) ?? 0)
-        mini.number3 = Int16(Int(number3Text) ?? 0)
-        mini.number4 = Int16(Int(number4Text) ?? 0)
-        mini.number5 = Int16(Int(number5Text) ?? 0)
-        mini.bonusNumber1 = Int16(Int(bonusNumber1Text) ?? 0)
+        func to1to31(_ s: String) -> Int16 {
+            let n = Int(s) ?? 0
+            if n <= 0 { return 1 }
+            if n > 31 { return 31 }
+            return Int16(n)
+        }
+        mini.number1 = to1to31(number1Text)
+        mini.number2 = to1to31(number2Text)
+        mini.number3 = to1to31(number3Text)
+        mini.number4 = to1to31(number4Text)
+        mini.number5 = to1to31(number5Text)
+        mini.bonusNumber1 = to1to31(bonusNumber1Text)
         mini.bonusNumber2 = 0
         do { try viewContext.save(); dismiss() } catch { print("Failed to save: \(error)") }
     }
